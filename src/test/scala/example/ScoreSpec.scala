@@ -15,7 +15,7 @@ class ScoreSpec extends flatspec.AnyFlatSpec
 
   private val scores = Table(
     ("name", "value", "next"),
-    ("Zero", "0", "Fifteen"),
+    ("Love", "0", "Fifteen"),
     ("Fifteen", "15", "Thirty"),
     ("Thirty", "30", "Forty"),
     ("Forty", "40", "Advantage"),
