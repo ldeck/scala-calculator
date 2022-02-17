@@ -23,3 +23,12 @@ class OperationReducerSpec extends BaseFlatSpec:
     }
   }
 
+  it should "return an error when the operator is not supported" in {
+    val reducer = OperationReducer(Map('$' -> ((a: Int, b: Int) => 300)))
+    val invalidOperators: Gen[Char] = for (n <- Gen.asciiChar.filter(_ != '$')) yield n
+    forAll(digits, digits, invalidOperators) { (a: Int, b: Int, op: Char) =>
+      the[IllegalArgumentException] thrownBy {
+        reducer.reduceOne(List(a, b), op)
+      } should have message s"The postfix operator '$op' is unsupported!"
+    }
+  }
