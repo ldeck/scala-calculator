@@ -7,4 +7,6 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 trait BaseFlatSpec extends flatspec.AnyFlatSpec with Matchers with ScalaCheckPropertyChecks {
 
+  val digits: Gen[Int] = for (n <- Gen.choose(0, 9)) yield n
+
 }
