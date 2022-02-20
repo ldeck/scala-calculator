@@ -125,3 +125,21 @@ class TimesOperator:
 
 We expect this will fail as we're returning zero. Seeing it does fail, we fix this by returning `a * b`.
 
+### Step 4: refactor ###
+
+By this time we can define a common interface for operators in our Operator.scala file:
+
+```scala
+package example
+
+trait Operator:
+  def compute(a: Int, b: Int): Int
+
+class PlusOperator extends Operator:
+  override def compute(a: Int, b: Int): Int = a + b
+
+class TimesOperator extends Operator:
+  override def compute(a: Int, b: Int): Int = a * b
+
+```
+
