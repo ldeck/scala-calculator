@@ -52,3 +52,23 @@ Why return a list? Consider the following incomplete extressions:
 Are these an error or an opportunity to show an in-progress worksheet from a user? That depends on the application context. i.e., such a calculation reducer can be plugged into concrete implementations to decide.
 
 We'll concentrate here on the core postfix implementation.
+
+## Steps ##
+
+### Step 1: define base test / spec trait ###
+
+Let's define a BaseFlatSpec trait to base our various test/spec files off.
+
+NB: I'm not specifying scalatest's flat spec as a preferred style here; just another one to try out.
+
+```scala
+package example
+
+import org.scalacheck.Gen
+import org.scalatest.flatspec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+
+trait BaseFlatSpec extends flatspec.AnyFlatSpec with Matchers with ScalaCheckPropertyChecks
+```
+
