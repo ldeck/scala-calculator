@@ -72,3 +72,33 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 trait BaseFlatSpec extends flatspec.AnyFlatSpec with Matchers with ScalaCheckPropertyChecks
 ```
 
+### Step 2: Define plus operator behaviour ###
+
+Defining the behaviour of a simple plus operator seems like a good place to start. Notice that a plus '+' operator must takes two operands on its left and right. Thus in postfix notation it will apply to two preceding numbers.
+
+e.g., `A B + == A + B` and `A B C * + == A + B * C`
+
+Our PlusOperatorSpec can begin like so:
+
+```scala
+package example
+
+class OperatorSpec extends BaseFlatSpec {
+
+  "a plus operator" should "add two numbers together" in {
+    forAll ("a", "b") { (a: Int, b: Int) =>
+      PlusOperator().compute(a, b) shouldEqual (a + b)
+    }
+  }
+}
+```
+
+Pretty simple. The implementation then begins...
+
+```scala
+class PlusOperator:
+  def compute(a: Int, b: Int): Int = ???
+```
+
+We run the test. It naturally compiles but fails being unimplemented. Replacing the '???' with `a + b` and rerunning the test passes.
+
