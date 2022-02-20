@@ -34,3 +34,21 @@ Examples include:
 | (A + B) * (C + D) | A B + C D + *      |
 | A * B + C * D     | A B * C D * +      |
 | A + B + C + D     | A B + C + D +      |
+
+## Details ##
+
+The primary PostfixCalculator class will expose a single public function:
+
+```scala
+    def reduce(inputs: List[Int|Char]): List[Int|Char]
+```
+
+Why return a list? Consider the following incomplete extressions:
+
+- `A B`
+- `A B + C`
+- `A B * +`
+
+Are these an error or an opportunity to show an in-progress worksheet from a user? That depends on the application context. i.e., such a calculation reducer can be plugged into concrete implementations to decide.
+
+We'll concentrate here on the core postfix implementation.
