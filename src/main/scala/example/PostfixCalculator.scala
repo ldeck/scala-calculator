@@ -7,9 +7,9 @@ class PostfixCalculator(val operationReducer: OperationReducer):
 
   @tailrec
   private def compute(expression: List[Int|Char], stack: List[Int]): List[Int] = expression match {
-    case Nil => stack
+    case Nil => stack.reverse
     case head :: tail => head match {
-      case number: Int => compute(expression = tail, stack = stack ::: List(number))
+      case number: Int => compute(expression = tail, stack = List(number) ::: stack)
       case op: Char => compute(expression = tail, stack = operationReducer.reduceOne(numbers = stack, op = op))
     }
   }

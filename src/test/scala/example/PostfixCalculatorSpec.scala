@@ -26,4 +26,37 @@ class PostfixCalculatorSpec extends BaseFlatSpec {
       calculator.compute(tokens) shouldEqual List(a + b + c)
     }
   }
+
+  it should "support operator precedence to multiply last pair first (like A + B * C)" in {
+    val calculator = PostfixCalculator(operationReducer = OperationReducer(operators = Map(
+      '+' -> ((a: Int, b: Int) => a + b),
+      '*' -> ((a: Int, b: Int) => a * b),
+    )))
+    forAll ((digits, "a"), (digits, "b"), (digits, "c")) { (a: Int, b: Int, c: Int) =>
+      val tokens = List[Int|Char](a, b, c, '*', '+')
+      calculator.compute(tokens) shouldEqual List(a + b * c)
+    }
+  }
+
+  it should "support operator precedence A + B * C + D" in {
+    val calculator = PostfixCalculator(operationReducer = OperationReducer(operators = Map(
+      '+' -> ((a: Int, b: Int) => a + b),
+      '*' -> ((a: Int, b: Int) => a * b),
+    )))
+    forAll ((digits, "a"), (digits, "b"), (digits, "c"), (digits, "d")) { (a: Int, b: Int, c: Int, d: Int) =>
+      val tokens = List[Int|Char](a, b, c, '*', '+', d, '+')
+      calculator.compute(tokens) shouldEqual List(a + b * c + d)
+    }
+  }
+
+  it should "support grouped maths like (A + B) * (C + D)" in {
+    val calculator = PostfixCalculator(operationReducer = OperationReducer(operators = Map(
+      '+' -> ((a: Int, b: Int) => a + b),
+      '*' -> ((a: Int, b: Int) => a * b),
+    )))
+    forAll ((digits, "a"), (digits, "b"), (digits, "c"), (digits, "d")) { (a: Int, b: Int, c: Int, d: Int) =>
+      val tokens = List[Int|Char](a, b, '+', c, d, '+', '*')
+      calculator.compute(tokens) shouldEqual List((a + b) * (c + d))
+    }
+  }
 }
