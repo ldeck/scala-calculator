@@ -1,6 +1,6 @@
 package example
 
-class OperationReducer(val operators: Map[Char, Operator]):
+class OperandsListReducer(val operators: Map[Char, Operator]):
 
   def reduceOne(numbers: List[Int], op: Char): List[Int] = numbers match {
     case a :: b :: tail => 

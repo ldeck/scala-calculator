@@ -3,7 +3,7 @@ package example
 import scala.annotation.tailrec
 import scala.collection.mutable
 
-class PostfixCalculator(val operationReducer: OperationReducer):
+class PostfixCalculator(val operationReducer: OperandsListReducer):
 
   @tailrec
   private def compute(expression: List[Int|Char], stack: List[Int]): List[Int] = expression match {
