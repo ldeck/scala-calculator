@@ -143,3 +143,104 @@ class TimesOperator extends Operator:
 
 ```
 
+### Step 5: define operands reducer ###
+
+After some thinking time to reflect on what to do next...
+
+You'll recall that the input expression to our PostfixCalculator is a `List[Int|Char]` (in its simplest form). The 'Char' allows operator chars like '+' and '*' to be expressed. All other items (the operands) are to be operated on.
+
+What occurs to the list when two operands are operated on? The list reduces in size by 1 as two operands are computed into a, possibly intermediate, result.
+
+So what we need is an OperandsListReducer. Let's start with the simplest case, replacing a list of two numbers with their operated result.
+
+Let's assume there was an operator '!' that when applied to two operands returns 100.
+
+```scala
+class OperandsListReducerSpec extends BaseFlatSpec:
+
+  "an operands list reducer" should "replace the pair of numbers in the given collection with their calculated value" in {
+    val reducer = OperandsListReducer(Map('!' -> ((a: Int, b: Int) => 100)))
+    reducer.reduceOne(List(1, 2), '!') shouldEqual List(100)
+  }
+
+```
+
+The starting (failed) implementation:
+
+```scala
+package example
+
+class OperandsListReducer(val operators: Map[Char, Operator]):
+
+  def reduceOne(numbers: List[Int], op: Char): List[Int] = ???
+```
+
+Since our operators require two operands to work on we can use scala's pattern matching to extract them, compute their replacement value and return it as a list to satisy this test case:
+
+```scala
+  def reduceOne(operands: List[Int], op: Char): List[Int] =
+    List(operands(op).compute(operands.head, operands.last)
+```
+
+This is clearly not satisfactory as so far we're discarding possibly extra operands that may be required for subsequent operations.
+
+The question is, do we reduce from the head of the list or the tail? We don't want to think about operator precedence as yet. So let's just reduce from the head of the list, which is the simplest thing we can do.
+
+```scala
+  it should "replace the first two items in the list with their calculated value" in {
+    val reducer = OperandsListReducer(Map('@' -> ((a: Int, b: Int) => 200)))
+    reducer.reduceOne(List(1, 2, 3), '@') shouldEqual List(200, 3)
+  }
+```
+
+Now we can update the implementation to pattern match on the input like so:
+
+```scala
+  def reduceOne(operands: List[Int], op: Char): List[Int] = operands match {
+    case a :: b :: tail => operands(op).compute(a, b) :: tail
+    case _ => operands  // default case required to satisfy compilation only
+```
+
+Are we done? Clearly not. There's 2 possible failed states:
+  * What if we don't have at least two operands?
+  * What if the operation `op` isn't defined?
+
+```scala
+  it should "throw an illegal state exception when less than two operands are supplied" in {
+    val reducer = OperandsListReducer(Map('#' -> ((a: Int, b: Int) => 300)))
+    forAll { (a: Int) =>
+      the[IllegalStateException] thrownBy {
+        reducer.reduceOne(List(a), '#')
+      } should have message s"A postfix operator cannot be applied to a single value ($a)"
+    }
+  }
+```
+
+The updated default case:
+
+```scala
+    case _ =>
+      throw IllegalStateException(s"""A postfix operator cannot be applied to a single value (${numbers.mkString("")})""")
+```
+
+Next, let's use an illegal argument exception for an unknown operator:
+
+```scala
+  it should "return an error when the operator is not supported" in {
+    val reducer = OperandsListReducer(operators = Map.empty)
+    forAll { (a: Int, b: Int, op: Char) =>
+      the[IllegalArgumentException] thrownBy {
+        reducer.reduceOne(List(a, b), op)
+      } should have message s"The postfix operator '$op' is unsupported!"
+    }
+  }
+```
+
+The updated implementation:
+
+```scala
+    case a :: b :: tail =>
+      operators.getOrElse(op, throw IllegalArgumentException(s"The postfix operator '$op' is unsupported!"))
+      .calculate(a, b) :: tail
+```
+
