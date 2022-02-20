@@ -244,3 +244,75 @@ The updated implementation:
       .calculate(a, b) :: tail
 ```
 
+### Step 6: circle back to PostfixCalculator ###
+
+We should now be in a position to supply a basic expression `A B +` and obtain a result.
+
+But first, let's just return the input expression if no operands are supplied.
+
+```scala
+package Example
+
+class PostfixCalculatorSpec extends BaseFlatSpec {
+
+  "a postfix calculator" should "return input digits when no arithmetic operators expressed" in {
+    val calculator = PostfixCalculator(operationReducer = OperandsListReducer(operators = Map()))
+    forAll("a", "b", "c") { (a:Int, b:Int, c:Int) =>
+      calculator.compute(List(a, b, c)) shouldEqual List(a, b, c)
+    }
+  }
+```
+
+The simplest implementation?
+
+```scala
+class PostfixCalculator(val operationReducer: OperandsListReducer):
+  def compute(expression: List[Int|Char]): List[Int] = expression.asInstanceOf[List[Int]]
+```
+
+It's not typesafe, but we'll be writing more test cases, right? Yes.
+
+Now let's add two numbers:
+
+```scala
+  it should "be able to add two integers" in {
+    val calculator = PostfixCalculator(operationReducer = OperandsListReducer(operators = Map('+' -> ((a: Int, b: Int) => 100))))
+    forAll ("a", "b") { (a: Int, b: Int) =>
+      val tokens = List[Int|Char](a, b, '+')
+      calculator.compute(tokens) shouldEqual List(100)
+    }
+  }
+```
+
+We're going to be cheeky to force some better tests.
+
+```scala
+class PostfixCalculator(val operationReducer: OperandsListReducer):
+  def compute(expression: List[Int|Char]): List[Int] = expression.size match {
+    case 2 => expression.asInstanceOf[List[Int]]
+    case _ => List(100)
+  }
+```
+
+Okay, this should do it?
+
+```scala
+  it should "be capable of more complex additions" in {
+    val calculator = PostfixCalculator(operationReducer = OperandsListReducer(operators = Map('+' -> ((a: Int, b: Int) => a + b))))
+    forAll ("a", "b", "c") { (a: Int, b: Int, c: Int) =>
+      val tokens = List[Int|Char](a, b, '+', c, '+')
+      calculator.compute(tokens) shouldEqual List(a + b + c)
+    }
+  }
+```
+
+Don't be so quick!
+
+```scala
+class PostfixCalculator(val operationReducer: OperandsListReducer):
+  def compute(expression: List[Int|Char]): List[Int] = expression.size match {
+    case 2 => expression.asInstanceOf[Int]
+    case 3 => List(100)
+    case _ => List(expression.filter(_.isInstanceOf[Int]).asInstanceOf[List[Int]].sum)
+  }
+```
