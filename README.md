@@ -102,3 +102,26 @@ class PlusOperator:
 
 We run the test. It naturally compiles but fails being unimplemented. Replacing the '???' with `a + b` and rerunning the test passes.
 
+### Step 3: times operator ###
+
+Let's define one more operator for now to allow multiplying numbers: '*'.
+
+Our test case is not dissimilar to the plus case:
+
+```scala
+  "a times operator" should "multiply two numbers together" in {
+    forAll ("a", "b") { (a: Int, b: Int) =>
+      TimesOperator().compute(a, b) shouldEqual (a * b)
+    }
+  }
+```
+
+And to allow it to compile we add the basic implementation:
+
+```scala
+class TimesOperator:
+  def compute(a: Int, b: Int): Int = 0
+```
+
+We expect this will fail as we're returning zero. Seeing it does fail, we fix this by returning `a * b`.
+
