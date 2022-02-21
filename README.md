@@ -316,3 +316,56 @@ class PostfixCalculator(val operationReducer: OperandsListReducer):
     case _ => List(expression.filter(_.isInstanceOf[Int]).asInstanceOf[List[Int]].sum)
   }
 ```
+
+### Step 7: postfix calculation recursion ###
+
+Okay, to do this properly we need to up the game and include multiple operators. e.g., '+' and '*'.
+
+```scala
+  it should "support operator precedence to multiply last pair first (like A + B * C)" in {
+    val calculator = PostfixCalculator(operationReducer = OperandsListReducer(operators = Map(
+      '+' -> ((a: Int, b: Int) => a + b),
+      '*' -> ((a: Int, b: Int) => a * b),
+    )))
+    forAll ((digits, "a"), (digits, "b"), (digits, "c")) { (a: Int, b: Int, c: Int) =>
+      val tokens = List[Int|Char](a, b, c, '*', '+')
+      calculator.compute(tokens) shouldEqual List(a + b * c)
+    }
+  }
+```
+
+This is trickier now.
+
+- We need to parse a, b and c without yet knowing what to do with them. We covered that above, the result being they are returned uncalculated.
+- Then we parse an operator, and we have to decide which operands to operate on since we have three of them. Recall that an operator only operates on two inputs. This is where operator precedence can help us decide.
+- The idea is that any operator reduces the 'stack' by taking two numbers and replacing them with a single value. But which two?
+- We can observe that it is always reducing from right to left in postfix notation to honour operator precedence. Thus we always pop the last two items and append their result which eventually results in a single value.
+
+For example:
+```
+1 2 + 3 * 6 + 2 3 + /
+```
+
+This is equivalent to:
+```
+(((1 + 2) * 3) + 6) / (2 + 3)
+```
+
+To do this, we'll define another function that takes an empty 'stack' of operands by default. For each element, we'll prepend it to the stack if it's a number and recurse.
+
+```scala
+  @tailrec
+  private def compute(expression: List[Int|Char], stack: List[Int]): List[Int] = expression match {
+    case Nil => stack.reverse
+    case head :: tail => head match {
+      case number: Int => compute(expression = tail, stack = List(number) ::: stack)
+      case op: Char => compute(expression = tail, stack = operationReducer.reduceOne(numbers = stack, op = op))
+    }
+  }
+
+  def compute(expression: List[Int|Char]): List[Int] = compute(expression, List())
+```
+
+NB: operating on the last two items is the same as reversing the order of the list, taking the first two items, calculating their operationp, prepending their result and ultimately returning the resulting stack reversed again. This sounds more complex than it is, but essentially makes pattern matching easier.
+
+Annotating with `scala.annotation.tailrec` verifies that the method will be compiled with tail call optimisation. The compiler will issue an error if the function cannot be optimised into a loop.

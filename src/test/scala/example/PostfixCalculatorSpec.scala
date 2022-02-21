@@ -6,7 +6,7 @@ class PostfixCalculatorSpec extends BaseFlatSpec {
 
   "a postfix calculator" should "return input digits when no arithmetic operators expressed" in {
     val calculator = PostfixCalculator(operationReducer = OperandsListReducer(operators = Map()))
-    forAll((digits, "a"), (digits, "b"), (digits, "c")) { (a:Int, b:Int, c:Int) =>
+    forAll("a", "b", "c") { (a:Int, b:Int, c:Int) =>
       calculator.compute(List(a, b, c)) shouldEqual List(a, b, c)
     }
   }
