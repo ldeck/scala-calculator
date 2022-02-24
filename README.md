@@ -40,7 +40,7 @@ Examples include:
 The primary PostfixCalculator class will expose a single public function:
 
 ```scala
-    def reduce(inputs: List[Int|Char]): List[Int|Char]
+    def reduce(inputs: List[Int|Char]): List[Int]
 ```
 
 Why return a list? Consider the following incomplete extressions:
