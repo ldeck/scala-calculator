@@ -369,3 +369,53 @@ To do this, we'll define another function that takes an empty 'stack' of operand
 NB: operating on the last two items is the same as reversing the order of the list, taking the first two items, calculating their operationp, prepending their result and ultimately returning the resulting stack reversed again. This sounds more complex than it is, but essentially makes pattern matching easier.
 
 Annotating with `scala.annotation.tailrec` verifies that the method will be compiled with tail call optimisation. The compiler will issue an error if the function cannot be optimised into a loop.
+
+## IDE and Build Notes ##
+
+I've used IntelliJ IDEA 2021.3.2 with relevant scala plugins for development. SBT was used for the build. Both, it must be said, were an unfortunate choice. See below for more details.
+
+### IntelliJ ###
+
+#### IntelliJ Version Used ####
+
+```
+IntelliJ IDEA 2021.3.2 (Ultimate Edition)
+Subscription is active until August 26, 2022.
+Runtime version: 11.0.13+7-b1751.25 x86_64
+VM: OpenJDK 64-Bit Server VM by JetBrains s.r.o.
+macOS 12.1
+GC: G1 Young Generation, G1 Old Generation
+Memory: 2048M
+Cores: 16
+
+Registry:
+    analyze.exceptions.on.the.fly=true
+    js.debugger.webconsole=false
+    scala.erase.compiler.process.jdk.once=false
+
+Non-Bundled Plugins:
+    systems.fehn.intellijdirenv (0.2.3)
+    com.mle.idea.sbtexecutor (1.4.1)
+    org.intellij.scala (2021.3.18)
+```
+
+#### Pain Points: Scala plugin? ####
+
+I generally found that IntelliJ was unable to provide help for a number of things in Scala that would ordinarily be easy in Java:
+- Whilst creating a test for a desired type or function that did not as yet exist, IntelliJ refused to offer any assistance in generating these for Scala.
+- If I wanted to debug a test spec, this wasn't always possible. This may be due to the syntactic sugar of certain styles of ScalaTest, particularly for property-based testing.
+- Some imports were not suggested, having to be added by hand. Ouch.
+
+That was disappointing, since the Scala language itself is nice.
+
+### SBT ###
+
+Let's just say that the summary of problems I experienced were:
+
+1. SBT takes an age for an sbt project to resolve its dependencies, especially when firstly generating the project. Expect long delays.
+2. SBT's initialisation / compilation is slow
+3. SBT's syntax is not simple.
+
+In short, SBT stands for "Simple Build Tool", but is not only not simple but sluggish.
+
+A more complete critique is [here](https://www.lihaoyi.com/post/SowhatswrongwithSBT.html).
